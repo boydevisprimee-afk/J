@@ -599,26 +599,38 @@ html,body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--dark
   </div>
 
   <!-- Footer -->
-  <div class="footer">
+<div class="footer">
     <div class="foot-logo"><b>JIJI</b> PAY</div>
     <div class="foot-txt">© 2024 Jiji Pay · Commande Sécurisée · Côte d'Ivoire</div>
   </div>
 
 </div>
 
+<script>
 function enterSite(){
-  const sp=document.getElementById('splash');
-  const ap=document.getElementById('app');
+  const sp = document.getElementById('splash');
+  const ap = document.getElementById('app');
+
   sp.classList.add('hide');
+
   setTimeout(()=>{
     sp.style.display='none';
     ap.classList.add('show');
-    setTimeout(()=>ap.classList.add('visible'),30);
+
+    setTimeout(()=>{
+      ap.classList.add('visible');
+    },30);
   },500);
 }
+
 document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!document.getElementById('splash').classList.contains('hide'))enterSite();
+  const splash=document.getElementById('splash');
+
+  if(e.key==='Enter' && splash && !splash.classList.contains('hide')){
+    enterSite();
+  }
 });
+
 function commander(){
   const v=document.getElementById('vendeur').value.trim();
   const a=document.getElementById('article').value.trim();
@@ -632,10 +644,16 @@ function commander(){
 
   err.classList.remove('show');
 
-  window.location.href =
-    'https://pay.wave.com/m/M_ci_MfMMeUv1FSzv/c/ci/?amount=' + p;
+  window.open(
+    'https://pay.wave.com/m/M_ci_MfMMeUv1FSzv/c/ci/?amount=' + p,
+    '_blank'
+  );
 }
 
 function annuler(){
   window.location.href='https://wa.me/2250556333313';
-                                  }
+}
+</script>
+
+</body>
+</html>
